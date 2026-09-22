@@ -1,0 +1,991 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CKD Initial Health Assessment</title>
+
+    <style>
+        :root {
+            --primary: #0b6e8e;
+            --primary-dark: #084f68;
+            --secondary: #16a6a0;
+            --light-blue: #eef8fb;
+            --background: #f4f8fa;
+            --white: #ffffff;
+            --text: #243746;
+            --muted: #71808c;
+            --border: #d9e3e8;
+            --danger: #c62828;
+            --shadow: 0 10px 30px rgba(20, 60, 80, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: var(--background);
+            color: var(--text);
+        }
+
+        /* ---------- Header ---------- */
+
+        .top-header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: white;
+            padding: 28px 20px;
+        }
+
+        .header-content {
+            max-width: 1050px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .hospital-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .header-content h1 {
+            margin: 0;
+            font-size: 27px;
+            font-weight: 700;
+        }
+
+        .header-content p {
+            margin: 5px 0 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        /* ---------- Page ---------- */
+
+        .page {
+            max-width: 1050px;
+            margin: 30px auto 60px;
+            padding: 0 18px;
+        }
+
+        /* ---------- Notice ---------- */
+
+        .notice {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            background: var(--light-blue);
+            border: 1px solid #c9e8ef;
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 22px;
+        }
+
+        .notice-icon {
+            font-size: 22px;
+        }
+
+        .notice strong {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--primary-dark);
+        }
+
+        .notice p {
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #52636d;
+        }
+
+        /* ---------- Main Card ---------- */
+
+        .assessment-card {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 24px 28px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-header h2 {
+            margin: 0 0 6px;
+            font-size: 21px;
+        }
+
+        .card-header p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* ---------- Sections ---------- */
+
+        .section {
+            padding: 25px 28px 8px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .section-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .section-title h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .section-title span {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        /* ---------- Grid ---------- */
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .field-group {
+            margin-bottom: 16px;
+        }
+
+        .field-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 7px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #344955;
+        }
+
+        .required {
+            color: var(--danger);
+            margin-left: 3px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #78909c;
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        input,
+        select {
+            width: 100%;
+            height: 46px;
+            padding: 10px 13px 10px 40px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: #fbfdfe;
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(11, 110, 142, 0.10);
+        }
+
+        .reference {
+            display: block;
+            margin-top: 6px;
+            color: #87959e;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .error {
+            display: block;
+            margin-top: 6px;
+            color: var(--danger);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* ---------- Submit ---------- */
+
+        .form-footer {
+            margin-top: 12px;
+            padding: 22px 28px;
+            background: #f8fbfc;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .footer-note {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .submit-button {
+            border: none;
+            min-width: 190px;
+            padding: 13px 22px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(11, 110, 142, 0.20);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 7px 18px rgba(11, 110, 142, 0.28);
+        }
+
+        /* ---------- Footer ---------- */
+
+        .page-footer {
+            text-align: center;
+            margin-top: 22px;
+            color: #89979f;
+            font-size: 11px;
+        }
+
+        /* ---------- Responsive ---------- */
+
+        @media (max-width: 700px) {
+            .header-content {
+                align-items: flex-start;
+            }
+
+            .header-content h1 {
+                font-size: 21px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+
+            .field-group.full-width {
+                grid-column: auto;
+            }
+
+            .section {
+                padding: 22px 18px 5px;
+            }
+
+            .card-header {
+                padding: 22px 18px;
+            }
+
+            .form-footer {
+                padding: 20px 18px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .submit-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Hospital Header -->
+    <header class="top-header">
+        <div class="header-content">
+            <div class="hospital-icon">⚕</div>
+
+            <div>
+                <h1>CKD Initial Health Assessment</h1>
+                <p>Clinical screening and risk assessment</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="page">
+
+        <!-- Important Notice -->
+        <div class="notice">
+            <div class="notice-icon">ℹ️</div>
+
+            <div>
+                <strong>Initial Clinical Screening</strong>
+                <p>
+                    Please enter the patient's available clinical and laboratory
+                    information accurately. This assessment is intended as an
+                    initial screening aid and should be interpreted by a qualified
+                    healthcare professional.
+                </p>
+            </div>
+        </div>
+
+        <div class="assessment-card">
+
+            <!-- Card Header -->
+            <div class="card-header">
+                <h2>Patient Assessment Form</h2>
+                <p>
+                    Enter the patient's demographic information and laboratory
+                    results below.
+                </p>
+            </div>
+
+            <form action="/predict" method="POST" novalidate>
+
+                <!-- Patient Information -->
+                <section class="section">
+
+                    <div class="section-title">
+                        <div class="section-number">1</div>
+
+                        <div>
+                            <h3>Patient Information</h3>
+                            <span>Basic demographic details</span>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+
+                        <!-- Age -->
+                        <div class="field-group">
+
+                            <label for="personAge">
+                                Age <span class="required">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <span class="input-icon">👤</span>
+
+                                <input
+                                    type="number"
+                                    id="personAge"
+                                    name="personAge"
+                                    min="1"
+                                    max="120"
+                                    step="1"
+                                    value="{{ form.get('personAge', '') }}"
+                                    placeholder="Enter age"
+                                    required
+                                >
+                            </div>
+
+                            <span class="reference">
+                                Patient age in years
+                            </span>
+
+                            {% if errors.get('personAge') %}
+                                <span class="error">
+                                    {{ errors['personAge'] }}
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                        <!-- Gender -->
+                        <div class="field-group">
+
+                            <label for="personGender">
+                                Gender <span class="required">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <span class="input-icon">⚧</span>
+
+                                <select
+                                    id="personGender"
+                                    name="personGender"
+                                    required
+                                >
+                                    <option value="">Select gender</option>
+
+                                    <option
+                                        value="Male"
+                                        {% if form.get('personGender') == 'Male' %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        Male
+                                    </option>
+
+                                    <option
+                                        value="Female"
+                                        {% if form.get('personGender') == 'Female' %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        Female
+                                    </option>
+                                </select>
+                            </div>
+
+                            <span class="reference">
+                                Select the patient's recorded sex
+                            </span>
+
+                            {% if errors.get('personGender') %}
+                                <span class="error">
+                                    {{ errors['personGender'] }}
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+                </section>
+
+
+                <!-- Blood Chemistry -->
+                <section class="section">
+
+                    <div class="section-title">
+                        <div class="section-number">2</div>
+
+                        <div>
+                            <h3>Blood Chemistry</h3>
+                            <span>Biochemical laboratory measurements</span>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+
+                        <!-- Glucose -->
+                        <div class="field-group">
+
+                            <label for="blood_glucose_random">
+                                Random Blood Glucose
+                                <span class="required">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <span class="input-icon">🩸</span>
+
+                                <input
+                                    type="number"
+                                    id="blood_glucose_random"
+                                    name="blood_glucose_random"
+                                    min="22"
+                                    max="800"
+                                    step="0.1"
+                                    value="{{ form.get('blood_glucose_random', '') }}"
+                                    placeholder="e.g. 110"
+                                    required
+                                >
+                            </div>
+
+                            <span class="reference">
+                                Reference range: 22–490 mg/dL
+                            </span>
+
+                            {% if errors.get('blood_glucose_random') %}
+                                <span class="error">
+                                    {{ errors['blood_glucose_random'] }}
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                        <!-- Blood Urea -->
+                        <div class="field-group">
+
+                            <label for="blood_urea">
+                                Blood Urea
+                                <span class="required">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <span class="input-icon">🧪</span>
+
+                                <input
+                                    type="number"
+                                    id="blood_urea"
+                                    name="blood_urea"
+                                    min="7"
+                                    max="200"
+                                    step="0.1"
+                                    value="{{ form.get('blood_urea', '') }}"
+                                    placeholder="e.g. 15"
+                                    required
+                                >
+                            </div>
+
+                            <span class="reference">
+                                Reference range: 7–20 mg/dL
+                            </span>
+
+                            {% if errors.get('blood_urea') %}
+                                <span class="error">
+                                    {{ errors['blood_urea'] }}
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                        <!-- Creatinine -->
+                        <div class="field-group">
+
+                            <label for="serum_creatinine">
+                                Serum Creatinine
+                                <span class="required">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <span class="input-icon">🧬</span>
+
+                                <input
+                                    type="number"
+                                    id="serum_creatinine"
+                                    name="serum_creatinine"
+                                    min="0.1"
+                                    max="12.0"
+                                    step="0.1"
+                                    value="{{ form.get('serum_creatinine', '') }}"
+                                    placeholder="e.g. 1.0"
+                                    required
+                                >
+                            </div>
+
+                            <span class="reference">
+                                Reference range: 0.6–1.3 mg/dL
+                            </span>
+
+                            {% if errors.get('serum_creatinine') %}
+                                <span class="error">
+                                    {{ errors['serum_creatinine'] }}
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                        <!-- Sodium -->
+                        <div class="field-group">
+
+                            <label for="sodium">
+                                Sodium
+                                <span class="required">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <span class="input-icon">💧</span>
+
+                                <input
+                                    type="number"
+                                    id="sodium"
+                                    name="sodium"
+                                    min="100"
+                                    max="145"
+                                    step="0.1"
+                                    value="{{ form.get('sodium', '') }}"
+                                    placeholder="e.g. 140"
+                                    required
+                                >
+                            </div>
+
+                            <span class="reference">
+                                Reference range: 135–145 mEq/L
+                            </span>
+
+                            {% if errors.get('sodium') %}
+                                <span class="error">
+                                    {{ errors['sodium'] }}
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                        <!-- Potassium -->
+                        <div class="field-group">
+
+                            <label for="potassium">
+                                Potassium
+                                <span class="required">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <span class="input-icon">⚡</span>
+
+                                <input
+                                    type="number"
+                                    id="potassium"
+                                    name="potassium"
+                                    min="2.5"
+                                    max="7.5"
+                                    step="0.1"
+                                    value="{{ form.get('potassium', '') }}"
+                                    placeholder="e.g. 4.2"
+                                    required
+                                >
+                            </div>
+
+                            <span class="reference">
+                                Reference range: 3.5–5.0 mEq/L
+                            </span>
+
+                            {% if errors.get('potassium') %}
+                                <span class="error">
+                                    {{ errors['potassium'] }}
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+                </section>
+
+
+                <!-- Hematology -->
+                <section class="section">
+
+                    <div class="section-title">
+                        <div class="section-number">3</div>
+
+                        <div>
+                            <h3>Hematology</h3>
+                            <span>Complete blood count parameters</span>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+
+                        <!-- Hemoglobin -->
+                        <div class="field-group">
+
+                            <label for="hemoglobin">
+                                Hemoglobin
+                                <span class="required">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <span class="input-icon">🩸</span>
+
+                                <input
+                                    type="number"
+                                    id="hemoglobin"
+                                    name="hemoglobin"
+                                    min="7.0"
+                                    max="17.5"
+                                    step="0.1"
+                                    value="{{ form.get('hemoglobin', '') }}"
+                                    placeholder="Enter value"
+                                    required
+                                >
+                            </div>
+
+                            <span id="hemoglobinReference" class="reference">
+                                Reference: Women 12.0–15.5 g/dL;
+                                Men 13.5–17.5 g/dL
+                            </span>
+
+                            {% if errors.get('hemoglobin') %}
+                                <span class="error">
+                                    {{ errors['hemoglobin'] }}
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- PCV -->
+                        <div class="field-group">
+
+                            <label for="packed_cell_volume">
+                                Packed Cell Volume
+                                <span class="required">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <span class="input-icon">🧫</span>
+
+                                <input
+                                    type="number"
+                                    id="packed_cell_volume"
+                                    name="packed_cell_volume"
+                                    min="19"
+                                    max="55"
+                                    step="0.1"
+                                    value="{{ form.get('packed_cell_volume', '') }}"
+                                    placeholder="Enter value"
+                                    required
+                                >
+                            </div>
+
+                            <span id="packedCellVolumeReference" class="reference">
+                                Reference: Women 36–44%;
+                                Men 41–50%
+                            </span>
+
+                            {% if errors.get('packed_cell_volume') %}
+                                <span class="error">
+                                    {{ errors['packed_cell_volume'] }}
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- WBC -->
+                        <div class="field-group">
+
+                            <label for="white_blood_cell">
+                                White Blood Cell Count
+                                <span class="required">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <span class="input-icon">🔬</span>
+
+                                <input
+                                    type="number"
+                                    id="white_blood_cell"
+                                    name="white_blood_cell"
+                                    min="4500"
+                                    max="15000"
+                                    step="1"
+                                    value="{{ form.get('white_blood_cell', '') }}"
+                                    placeholder="e.g. 7500"
+                                    required
+                                >
+                            </div>
+
+                            <span class="reference">
+                                Reference range: 4,500–11,000 /µL
+                            </span>
+
+                            {% if errors.get('white_blood_cell') %}
+                                <span class="error">
+                                    {{ errors['white_blood_cell'] }}
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- RBC -->
+                        <div class="field-group">
+
+                            <label for="red_blood_cell">
+                                Red Blood Cell Count
+                                <span class="required">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <span class="input-icon">🔴</span>
+
+                                <input
+                                    type="number"
+                                    id="red_blood_cell"
+                                    name="red_blood_cell"
+                                    min="2.35"
+                                    max="5.65"
+                                    step="0.01"
+                                    value="{{ form.get('red_blood_cell', '') }}"
+                                    placeholder="Enter value"
+                                    required
+                                >
+                            </div>
+
+                            <span id="redBloodCellReference" class="reference">
+                                Reference: Women 3.92–5.13 million/µL;
+                                Men 4.35–5.65 million/µL
+                            </span>
+
+                            {% if errors.get('red_blood_cell') %}
+                                <span class="error">
+                                    {{ errors['red_blood_cell'] }}
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+                </section>
+
+
+                <!-- Submit -->
+                <div class="form-footer">
+
+                    <div class="footer-note">
+                        <strong>* Required fields</strong><br>
+                        Verify laboratory values before submitting the assessment.
+                    </div>
+
+                    <button type="submit" class="submit-button">
+                        Run Initial Assessment →
+                    </button>
+
+                </div>
+
+            </form>
+        </div>
+
+        <div class="page-footer">
+            Clinical decision-support tool • For professional healthcare use
+        </div>
+
+    </main>
+
+
+    <script>
+
+        const genderField =
+            document.getElementById("personGender");
+
+        function updateGenderSpecificRanges() {
+
+            const gender =
+                (genderField.value || "").toLowerCase();
+
+            const hemoglobin =
+                document.getElementById("hemoglobin");
+
+            const hemoglobinReference =
+                document.getElementById("hemoglobinReference");
+
+            const pcv =
+                document.getElementById("packed_cell_volume");
+
+            const pcvReference =
+                document.getElementById("packedCellVolumeReference");
+
+            const rbc =
+                document.getElementById("red_blood_cell");
+
+            const rbcReference =
+                document.getElementById("redBloodCellReference");
+
+
+            if (gender === "male") {
+
+                hemoglobin.min = 13.5;
+                hemoglobin.max = 17.5;
+
+                hemoglobinReference.textContent =
+                    "Reference: Men: 13.5–17.5 g/dL";
+
+                pcv.min = 41;
+                pcv.max = 50;
+
+                pcvReference.textContent =
+                    "Reference: Men: 41–50%";
+
+                rbc.min = 4.35;
+                rbc.max = 5.65;
+
+                rbcReference.textContent =
+                    "Reference: Men: 4.35–5.65 million/µL";
+
+            }
+
+            else if (gender === "female") {
+
+                hemoglobin.min = 12.0;
+                hemoglobin.max = 15.5;
+
+                hemoglobinReference.textContent =
+                    "Reference: Women: 12.0–15.5 g/dL";
+
+                pcv.min = 36;
+                pcv.max = 44;
+
+                pcvReference.textContent =
+                    "Reference: Women: 36–44%";
+
+                rbc.min = 3.92;
+                rbc.max = 5.13;
+
+                rbcReference.textContent =
+                    "Reference: Women: 3.92–5.13 million/µL";
+
+            }
+
+            else {
+
+                hemoglobin.min = 12.0;
+                hemoglobin.max = 17.5;
+
+                hemoglobinReference.textContent =
+                    "Reference: Women: 12.0–15.5 g/dL; Men: 13.5–17.5 g/dL";
+
+                pcv.min = 36;
+                pcv.max = 50;
+
+                pcvReference.textContent =
+                    "Reference: Women: 36–44%; Men: 41–50%";
+
+                rbc.min = 3.92;
+                rbc.max = 5.65;
+
+                rbcReference.textContent =
+                    "Reference: Women: 3.92–5.13 million/µL; Men: 4.35–5.65 million/µL";
+            }
+        }
+
+
+        genderField.addEventListener(
+            "change",
+            updateGenderSpecificRanges
+        );
+
+        updateGenderSpecificRanges();
+
+    </script>
+
+</body>
+</html>
+
