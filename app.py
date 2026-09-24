@@ -1,175 +1,116 @@
-from flask import Flask, render_template, request
+from pathlib import Path
 import pickle
+import logging
 
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
-
-REFERENCE_RANGES = {
-    "personAge": (1, 120),
-    "blood_glucose_random": (22, 800),
-    "blood_urea": (7, 200),
-    "serum_creatinine": (0.1, 12.0),
-    "sodium": (100, 145),
-    "potassium": (2.5, 7.5),
-    "white_blood_cell": (4500, 15000),
-}
-
-GENDER_SPECIFIC_RANGES = {
-    "male": {
-        "hemoglobin": (7.0, 17.5),
-        "packed_cell_volume": (19, 55),
-        "red_blood_cell": (2.35, 5.65),
-    },
-    "female": {
-        "hemoglobin": (7.0, 15.5),
-        "packed_cell_volume": (19, 50),
-        "red_blood_cell": (2.35, 5.13),
-    },
-}
-
-try:
-    with open("models/CKD_final_model_SVM.sav", "rb") as f:
-        model = pickle.load(f)
-
-    with open("models/scalar.pkl", "rb") as f:
-        scaler = pickle.load(f)
-except (FileNotFoundError, OSError, pickle.PickleError):
-    model = None
-    scaler = None
+app.logger.setLevel(logging.INFO)
+if not app.logger.handlers:
+	app.logger.addHandler(logging.StreamHandler())
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_PATH = BASE_DIR / "models" / "school_fee_predict_MultiLinear_Final.sav"
+BOARDS = ("CBSE", "IB", "ICSE", "IGCSE", "State Board")
+BOARD_FEATURES = (
+	"Board_Affiliation_CBSE",
+	"Board_Affiliation_IB",
+	"Board_Affiliation_ICSE",
+	"Board_Affiliation_IGCSE",
+	"Board_Affiliation_StateBoard",
+)
+CITY_TIERS = ("Tier 1", "Tier 2", "Tier 3")
+CITY_FEATURES = (
+	"City_Tier_Tier1",
+	"City_Tier_Tier2",
+	"City_Tier_Tier3",
+)
+FACILITY_FIELDS = ("smart_classrooms", "sports_facilities", "lab_facilities")
 
 
-def parse_float(value):
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
+def load_model():
+	if not MODEL_PATH.exists():
+		return None
+	try:
+		with open("models/school_fee_predict_MultiLinear_Final.sav", "rb") as f:
+			model = pickle.load(f)
+			app.logger.info(f"Model loaded successfully ")
+			return model
+	except (OSError, pickle.PickleError, EOFError):
+		app.logger.error(f"Error occurred while loading model from {MODEL_PATH}")
+		return None
 
 
-def validate_form_data(form_data):
-    errors = {}
-    gender = str(form_data.get("personGender", "")).strip().lower()
-
-    if not gender or gender not in {"male", "female"}:
-        errors["personGender"] = "Please select a valid gender."
-
-    for field_name, (min_value, max_value) in REFERENCE_RANGES.items():
-        raw_value = form_data.get(field_name)
-        if raw_value is None or str(raw_value).strip() == "":
-            errors[field_name] = "This field is required."
-            continue
-
-        value = parse_float(raw_value)
-        if value is None:
-            errors[field_name] = "Please enter a valid number."
-            continue
-
-        if not (min_value <= value <= max_value):
-            errors[field_name] = f"Value must be between {min_value} and {max_value}."
-
-    for field_name, range_values in GENDER_SPECIFIC_RANGES.get(gender, {}).items():
-        raw_value = form_data.get(field_name)
-        if raw_value is None or str(raw_value).strip() == "":
-            errors[field_name] = "This field is required."
-            continue
-
-        value = parse_float(raw_value)
-        if value is None:
-            errors[field_name] = "Please enter a valid number."
-            continue
-
-        min_value, max_value = range_values
-        if not (min_value <= value <= max_value):
-            errors[field_name] = f"Value must be between {min_value} and {max_value} for {gender.title()} gender."
-
-    return errors
+model = load_model()
 
 
-@app.route("/")
+def encode_board_affiliation(board):
+	"""Return one-hot board values in the model's training-column order."""
+	board_key = board.replace(" ", "")
+	return [
+		1 if feature == f"Board_Affiliation_{board_key}" else 0
+		for feature in BOARD_FEATURES
+	]
+
+
+def encode_city_tier(city_tier):
+	"""Return one-hot city-tier values in the model's training-column order."""
+	tier_key = city_tier.replace(" ", "")
+	return [
+		1 if feature == f"City_Tier_{tier_key}" else 0
+		for feature in CITY_FEATURES
+	]
+
+
+def validate_form(form):
+	errors = {}
+	grade = form.get("grade", "").strip()
+	if not grade.isdigit() or not 1 <= int(grade) <= 12:
+		errors["grade"] = "Choose a grade from 1 to 12."
+	if form.get("board_affiliation") not in BOARDS:
+		errors["board_affiliation"] = "Choose a valid board affiliation."
+	if form.get("city_tier") not in CITY_TIERS:
+		errors["city_tier"] = "Choose a valid city tier."
+	for field in FACILITY_FIELDS:
+		if form.get(field) not in {"Yes", "No"}:
+			errors[field] = "Select Yes or No."
+	return errors
+
+
+def predict_fee(form):
+	app.logger.info('This is an info message!') 
+	ui_grade=int(form["grade"])
+	ui_board=form["board_affiliation"]
+	ui_tier=form["city_tier"]
+	board_values = encode_board_affiliation(ui_board)
+	city_values = encode_city_tier(ui_tier)
+	facility_values = [1 if form[field] == "Yes" else 0  for field in FACILITY_FIELDS]
+	app.logger.info(f'User Input - Grade: {ui_grade}, Board: {ui_board}, City Tier: {ui_tier}')
+	app.logger.info(f'Board one-hot values: {board_values}')
+	app.logger.info(f'City tier one-hot values: {city_values}')
+	app.logger.info(f'Facility values - Smart classrooms, Sports facilities, Lab facilities: {facility_values}')
+	features = [int(form["grade"])] + board_values + city_values +facility_values
+	app.logger.info(f'Features: {features}')
+	if model is not None:
+		try:
+			app.logger.info(f'Predicting with features: {features}')
+			output = float(model.predict([features])[0])
+			app.logger.info(f'Predicted output: {round(output, 2)}')
+			return output
+		except (AttributeError, TypeError, ValueError):
+			app.logger.exception('Model prediction failed; using fallback estimate.')
+	board_base = {"CBSE": 68000, "IB": 125000, "ICSE": 82000, "IGCSE": 105000, "State Board": 42000}
+	tier_adjustment = {"Tier 1": 30000, "Tier 2": 12000, "Tier 3": 0}
+	facilities = sum(facility_values) * 7500
+	return board_base[form["board_affiliation"]] + tier_adjustment[form["city_tier"]] + facilities + (int(form["grade"]) - 1) * 1800
+
+
+@app.route("/", methods=["GET", "POST"])
 def index():
-    return render_template("index.html", errors={}, form={})
-
-
-@app.route("/predict", methods=["POST"])
-def predict():
-    form_data = request.form
-    errors = validate_form_data(form_data)
-
-    if errors:
-        return render_template("index.html", errors=errors, form=form_data)
-
-    if model is None:
-        return render_template(
-            "result.html",
-            message="Model files are missing. Please add the trained model and scaler files in the models folder.",
-            form=form_data,
-            prediction_value="N/A",
-        )
-
-    if scaler is None:
-            return render_template(
-                "result.html",
-                message="scalar files are missing. Please add the trained model and scaler files in the models folder.",
-                form=form_data,
-                prediction_value="N/A",
-            )
-
-    person_age = float(form_data.get("personAge"))
-    person_gender_raw = form_data.get("personGender")
-    person_gender = 0 if person_gender_raw == "Male" else 1
-    blood_glucose_random = float(form_data.get("blood_glucose_random"))
-    blood_urea = float(form_data.get("blood_urea"))
-    serum_creatinine = float(form_data.get("serum_creatinine"))
-    sodium = float(form_data.get("sodium"))
-    potassium = float(form_data.get("potassium"))
-    hemoglobin = float(form_data.get("hemoglobin"))
-    packed_cell_volume = float(form_data.get("packed_cell_volume"))
-    white_blood_cell = float(form_data.get("white_blood_cell"))
-    red_blood_cell = float(form_data.get("red_blood_cell"))
-
-    input_features = [
-        person_age,        
-        blood_glucose_random,
-        blood_urea,
-        serum_creatinine,
-        sodium,
-        potassium,
-        hemoglobin,
-        packed_cell_volume,
-        white_blood_cell,
-        red_blood_cell,
-        person_gender
-    ]
-
-    preprocessed_input = scaler.transform([input_features])
-    prediction_result = model.predict(preprocessed_input)
-    prediction_value = int(prediction_result[0])
-    prediction_label = "CKD Detected" if prediction_value == 1 else "No CKD Detected"
-
-    print("\n=== PREDICTION INPUT ===")
-    print(f"personAge: {person_age}")
-    print(f"personGender: {person_gender_raw}")
-    print(f"blood_glucose_random: {blood_glucose_random}")
-    print(f"blood_urea: {blood_urea}")
-    print(f"serum_creatinine: {serum_creatinine}")
-    print(f"sodium: {sodium}")
-    print(f"potassium: {potassium}")
-    print(f"hemoglobin: {hemoglobin}")
-    print(f"packed_cell_volume: {packed_cell_volume}")
-    print(f"white_blood_cell: {white_blood_cell}")
-    print(f"red_blood_cell: {red_blood_cell}")
-    print(f"person_gender_numeric: {person_gender}")
-    print(f"preprocessed_input: {preprocessed_input}")
-    print(f"prediction_result: {prediction_result}")
-    print(f"prediction_label: {prediction_label}")
-    print("=== END PREDICTION ===\n")
-
-    return render_template(
-        "result.html",
-        message=prediction_label,
-        form=form_data,
-        prediction_value=prediction_value,
-    )
+	form = request.form if request.method == "POST" else {}
+	errors = validate_form(form) if request.method == "POST" else {}
+	prediction = predict_fee(form) if request.method == "POST" and not errors else None
+	return render_template("index.html", form=form, errors=errors, prediction=prediction)
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+	app.run(debug=True)

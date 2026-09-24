@@ -1,991 +1,1101 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>CKD Initial Health Assessment</title>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>EduScope | School Fee Predictor</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
 
     <style>
-        :root {
-            --primary: #0b6e8e;
-            --primary-dark: #084f68;
-            --secondary: #16a6a0;
-            --light-blue: #eef8fb;
-            --background: #f4f8fa;
-            --white: #ffffff;
-            --text: #243746;
-            --muted: #71808c;
-            --border: #d9e3e8;
-            --danger: #c62828;
-            --shadow: 0 10px 30px rgba(20, 60, 80, 0.08);
+    /* =====================================================
+       EDUSCOPE — LILAC + PINK THEME
+       ===================================================== */
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        background: #faf7fc;
+        color: #493b55;
+        font-family: "DM Sans", sans-serif;
+    }
+
+    /* ---------- HEADER ---------- */
+
+    header {
+        height: 72px;
+        padding: 0 7%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #ffffff;
+        border-bottom: 1px solid #eadff0;
+    }
+
+    .brand {
+        text-decoration: none;
+        color: #654578;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .brand b {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        margin-right: 7px;
+        border-radius: 10px;
+        background: #9b72c2;
+        color: white;
+    }
+
+    .status {
+        color: #897792;
+        font-size: 14px;
+    }
+
+    .status i {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        margin-right: 7px;
+        border-radius: 50%;
+        background: #e78ab0;
+    }
+
+    /* ---------- MAIN ---------- */
+
+    main {
+        width: min(1180px, 92%);
+        margin: 4px auto 45px;
+    }
+
+    /* ---------- INTRO ---------- */
+
+    .intro {
+        position: relative;
+        padding: 24px 40px 30px;
+        margin-bottom: 28px;
+        overflow: hidden;
+        border-radius: 24px;
+        background: linear-gradient(
+            135deg,
+            #f2eaff,
+            #fff0f6
+        );
+        border: 1px solid #e6d5ef;
+    }
+
+    .intro h1 {
+        margin: 2px 0 12px;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: clamp(34px, 5vw, 54px);
+        line-height: 1.08;
+        color: #4d3a5c;
+    }
+
+    .intro h1 em {
+        color: #c45d91;
+        font-style: normal;
+    }
+
+    .lead {
+        max-width: 680px;
+        margin: 0;
+        color: #76667d;
+        font-size: 17px;
+        line-height: 1.65;
+    }
+
+    .eyebrow {
+        margin: 0;
+        color: #9a68b8 !important;
+        font-size: 12px;
+        font-weight: bold;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+    }
+
+    /* ---------- SCHOOL ILLUSTRATION ---------- */
+
+    .school-art {
+        position: absolute;
+        right: 45px;
+        bottom: 20px;
+        width: 125px;
+        height: 105px;
+        opacity: .95;
+    }
+
+    /* ---------- WORKSPACE ---------- */
+
+    .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(280px, .8fr);
+        gap: 22px;
+        align-items: start;
+    }
+
+    .form-panel,
+    .result {
+        background: #ffffff;
+        border: 1px solid #eadfed;
+        border-radius: 22px;
+        box-shadow: 0 12px 35px rgba(111, 73, 126, .08);
+    }
+
+    .form-panel {
+        padding: 32px;
+    }
+
+    /* ---------- FORM HEADING ---------- */
+
+    .heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 28px;
+    }
+
+    .heading h2 {
+        margin: 5px 0 0;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 27px;
+        color: #543c63;
+    }
+
+    .heading small {
+        color: #b29bbd;
+        font-weight: 700;
+    }
+
+    /* ---------- LABELS ---------- */
+
+    form label {
+        display: block;
+        margin-bottom: 18px;
+        color: #654c70;
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+
+    /* ---------- SELECT ---------- */
+
+    select {
+        display: block;
+        width: 100%;
+        height: 50px;
+        margin-top: 8px;
+        padding: 0 15px;
+        border: 1px solid #ddcce6;
+        border-radius: 12px;
+        outline: none;
+        background: #fdfaff;
+        color: #5b4865;
+        font-family: inherit;
+        font-size: 15px;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    select:focus {
+        border-color: #bd82d8;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(189, 130, 216, .13);
+    }
+
+    /* ---------- DIVIDER ---------- */
+
+    .rule {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin: 28px 0 18px;
+        color: #735580;
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .rule::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #eadfed;
+    }
+
+    /* ---------- FACILITIES ---------- */
+
+    .facilities {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 13px;
+    }
+
+    fieldset {
+        min-width: 0;
+        margin: 0;
+        padding: 16px;
+        border: 1px solid #e2d6e8;
+        border-radius: 15px;
+        background: #fcf9fd;
+    }
+
+    fieldset legend {
+        padding: 0 5px;
+        color: #664d71;
+        font-size: 24px !important;
+        font-weight: 700;
+    }
+
+    .choices {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .choices label {
+        flex: 1;
+        margin: 0;
+    }
+
+    .choices input {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .choices span {
+        display: block;
+        padding: 9px 5px;
+        text-align: center;
+        border: 1px solid #dfd2e5;
+        border-radius: 9px;
+        background: white;
+        color: #81708a;
+        font-size: 13px;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .choices input:checked + span {
+        background: #fbe7f1;
+        border-color: #df82aa;
+        color: #ad4f7d;
+        font-weight: 700;
+    }
+
+    /* ---------- BUTTON ---------- */
+
+    button[type="submit"] {
+        width: 100%;
+        height: 56px;
+        margin-top: 25px;
+        border: 0;
+        border-radius: 14px;
+        background: linear-gradient(
+            90deg,
+            #9165b5,
+            #d46b9c
+        );
+        color: white;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    button[type="submit"]:hover:not(:disabled) {
+        background: linear-gradient(
+            90deg,
+            #8053a5,
+            #c8588c
+        );
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(184, 91, 139, .22);
+    }
+
+    /* Disabled until all fields are completed */
+
+    button[type="submit"]:disabled {
+        background: #d9d1dc;
+        color: #918796;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+    }
+
+    button span {
+        margin-left: 7px;
+        font-size: 19px;
+    }
+
+    /* ---------- RESULT CARD ---------- */
+
+    .result {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-height: 430px;
+        padding: 30px;
+        overflow: hidden;
+        background: linear-gradient(145deg, #fff0f8 0%, #f4e8ff 52%, #eadcff 100%);
+    }
+
+    .result::after {
+        content: "₹";
+        position: absolute;
+        right: -10px;
+        bottom: -35px;
+        color: rgba(194, 124, 214, .16);
+        font-size: 190px;
+        font-weight: 700;
+        z-index: 0;
+    }
+
+    .result > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .result-head {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .result-head strong {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #d96fa7, #9b72c2);
+        color: #ffffff;
+        font-size: 21px;
+    }
+
+    .amount {
+        margin-top: 42px;
+        color: #4b2b5c;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: clamp(38px, 5vw, 56px);
+        font-weight: 700;
+        word-break: break-word;
+    }
+
+    .note {
+        max-width: 300px;
+        color: #7c6b83;
+        line-height: 1.6;
+    }
+
+    .empty {
+        margin-top: 42px;
+        color: #8b7c92;
+    }
+
+    .empty b {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 62px;
+        height: 62px;
+        margin-bottom: 20px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #ead5ff, #ffd7ea);
+        color: #8f55ad;
+        font-size: 32px;
+    }
+
+    .empty p {
+        max-width: 270px;
+        line-height: 1.6;
+    }
+
+    .result footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: auto;
+        padding-top: 18px;
+        border-top: 1px solid #e6dbea;
+        color: #887890;
+        font-size: 12px;
+    }
+
+    .result footer span:last-child {
+        font-weight: 700;
+        color: #c45d91;
+    }
+
+    /* ---------- ERROR ---------- */
+
+    .error {
+        display: block;
+        margin-top: 5px;
+        color: #d05278;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    /* ---------- DISCLAIMER ---------- */
+
+    .disclaimer {
+        margin: 22px 5px;
+        color: #8c7f93;
+        text-align: center;
+        font-size: 21px;
+        line-height: 1.5;
+    }
+
+    /* ---------- RESPONSIVE ---------- */
+
+    @media (max-width: 850px) {
+
+        .workspace {
+            grid-template-columns: 1fr;
         }
 
-        * {
-            box-sizing: border-box;
+        .result {
+            min-height: 330px;
         }
 
-        body {
-            margin: 0;
-            font-family: "Segoe UI", Arial, sans-serif;
-            background: var(--background);
-            color: var(--text);
+        .school-art {
+            display: none;
+        }
+    }
+
+    @media (max-width: 620px) {
+
+        header {
+            padding: 0 5%;
         }
 
-        /* ---------- Header ---------- */
-
-        .top-header {
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            color: white;
-            padding: 28px 20px;
+        .status {
+            display: none;
         }
 
-        .header-content {
-            max-width: 1050px;
-            margin: auto;
-            display: flex;
-            align-items: center;
-            gap: 18px;
+        main {
+            width: 94%;
+            margin: 25px auto;
         }
 
-        .hospital-icon {
-            width: 58px;
-            height: 58px;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
+        .intro {
+            padding: 28px 23px;
         }
 
-        .header-content h1 {
-            margin: 0;
-            font-size: 27px;
-            font-weight: 700;
+        .intro h1 {
+            font-size: 35px;
         }
 
-        .header-content p {
-            margin: 5px 0 0;
-            opacity: 0.9;
-            font-size: 14px;
+        .form-panel {
+            padding: 22px;
         }
 
-        /* ---------- Page ---------- */
-
-        .page {
-            max-width: 1050px;
-            margin: 30px auto 60px;
-            padding: 0 18px;
+        .two-col,
+        .facilities {
+            grid-template-columns: 1fr;
         }
 
-        /* ---------- Notice ---------- */
+        .heading h2 {
+            font-size: 23px;
+        }
+    }
 
-        .notice {
-            display: flex;
-            gap: 14px;
-            align-items: flex-start;
-            background: var(--light-blue);
-            border: 1px solid #c9e8ef;
-            border-radius: 12px;
-            padding: 16px 18px;
-            margin-bottom: 22px;
+    /* ---------- TYPOGRAPHY REFINEMENT ---------- */
+
+    main {
+        width: min(1320px, 94%);
+    }
+
+    body {
+        font-size: 16px;
+        line-height: 1.55;
+    }
+
+    .brand {
+        font-size: 31px;
+        letter-spacing: -0.5px;
+    }
+
+    .status {
+        font-size: 20px;
+    }
+
+    .intro h1 {
+        font-size: clamp(45px, 5.5vw, 67px);
+        font-weight: 700;
+        letter-spacing: -1.5px;
+    }
+
+    .lead {
+        font-size: 23px;
+        line-height: 1.7;
+    }
+
+    .eyebrow {
+        font-size: 18px;
+        letter-spacing: 1.5px;
+    }
+
+    .heading h2 {
+        font-size: 35px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+
+    form label {
+        font-size: 21px;
+        line-height: 1.4;
+    }
+
+    select {
+        height: 61px;
+        font-size: 22px;
+    }
+
+    .rule {
+        font-size: 20px;
+    }
+
+    fieldset legend {
+        font-size: 20px;
+    }
+
+    .choices span {
+        padding: 12px 6px;
+        font-size: 20px;
+    }
+
+    button[type="submit"] {
+        height: 65px;
+        font-size: 23px;
+        letter-spacing: 0.1px;
+    }
+
+    .amount {
+        font-size: clamp(47px, 5vw, 65px);
+    }
+
+    .note,
+    .empty p {
+        font-size: 20px;
+    }
+
+    .result footer,
+    .disclaimer {
+        font-size: 21px;
+    }
+
+    @media (max-width: 620px) {
+        main {
+            width: 96%;
         }
 
-        .notice-icon {
-            font-size: 22px;
+        .brand {
+            font-size: 28px;
         }
 
-        .notice strong {
-            display: block;
-            margin-bottom: 4px;
-            color: var(--primary-dark);
+        .intro h1 {
+            font-size: 43px;
         }
 
-        .notice p {
-            margin: 0;
-            font-size: 13px;
-            line-height: 1.5;
-            color: #52636d;
-        }
-
-        /* ---------- Main Card ---------- */
-
-        .assessment-card {
-            background: var(--white);
-            border-radius: 16px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 24px 28px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .card-header h2 {
-            margin: 0 0 6px;
+        .lead {
             font-size: 21px;
         }
 
-        .card-header p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 14px;
+        .heading h2 {
+            font-size: 30px;
         }
-
-        /* ---------- Sections ---------- */
-
-        .section {
-            padding: 25px 28px 8px;
-        }
-
-        .section-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .section-number {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 13px;
-        }
-
-        .section-title h3 {
-            margin: 0;
-            font-size: 16px;
-        }
-
-        .section-title span {
-            color: var(--muted);
-            font-size: 12px;
-        }
-
-        /* ---------- Grid ---------- */
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-
-        .field-group {
-            margin-bottom: 16px;
-        }
-
-        .field-group.full-width {
-            grid-column: 1 / -1;
-        }
-
-        label {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 7px;
-            font-weight: 600;
-            font-size: 14px;
-            color: #344955;
-        }
-
-        .required {
-            color: var(--danger);
-            margin-left: 3px;
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 13px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #78909c;
-            font-size: 16px;
-            pointer-events: none;
-        }
-
-        input,
-        select {
-            width: 100%;
-            height: 46px;
-            padding: 10px 13px 10px 40px;
-            border: 1px solid var(--border);
-            border-radius: 9px;
-            background: #fbfdfe;
-            color: var(--text);
-            font-size: 14px;
-            outline: none;
-            transition: all 0.2s ease;
-        }
-
-        select {
-            cursor: pointer;
-        }
-
-        input:focus,
-        select:focus {
-            border-color: var(--primary);
-            background: white;
-            box-shadow: 0 0 0 3px rgba(11, 110, 142, 0.10);
-        }
-
-        .reference {
-            display: block;
-            margin-top: 6px;
-            color: #87959e;
-            font-size: 11px;
-            line-height: 1.4;
-        }
-
-        .error {
-            display: block;
-            margin-top: 6px;
-            color: var(--danger);
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        /* ---------- Submit ---------- */
-
-        .form-footer {
-            margin-top: 12px;
-            padding: 22px 28px;
-            background: #f8fbfc;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .footer-note {
-            color: var(--muted);
-            font-size: 12px;
-            line-height: 1.5;
-        }
-
-        .submit-button {
-            border: none;
-            min-width: 190px;
-            padding: 13px 22px;
-            border-radius: 9px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(11, 110, 142, 0.20);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .submit-button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 7px 18px rgba(11, 110, 142, 0.28);
-        }
-
-        /* ---------- Footer ---------- */
-
-        .page-footer {
-            text-align: center;
-            margin-top: 22px;
-            color: #89979f;
-            font-size: 11px;
-        }
-
-        /* ---------- Responsive ---------- */
-
-        @media (max-width: 700px) {
-            .header-content {
-                align-items: flex-start;
-            }
-
-            .header-content h1 {
-                font-size: 21px;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-                gap: 4px;
-            }
-
-            .field-group.full-width {
-                grid-column: auto;
-            }
-
-            .section {
-                padding: 22px 18px 5px;
-            }
-
-            .card-header {
-                padding: 22px 18px;
-            }
-
-            .form-footer {
-                padding: 20px 18px;
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .submit-button {
-                width: 100%;
-            }
-        }
-    </style>
+    }
+</style>
 </head>
+
 
 <body>
 
-    <!-- Hospital Header -->
-    <header class="top-header">
-        <div class="header-content">
-            <div class="hospital-icon">⚕</div>
+<header>
+    <a class="brand" href="{{ url_for('index') }}">
+        <b>E</b> eduscope
+    </a>
 
-            <div>
-                <h1>CKD Initial Health Assessment</h1>
-                <p>Clinical screening and risk assessment</p>
+    <span class="status">
+        <i></i> Prediction workspace
+    </span>
+</header>
+
+
+<main>
+
+    <!-- =====================================================
+         INTRO
+         ===================================================== -->
+
+    <section class="intro">
+
+        <p class="eyebrow">🎓 Annual planning tool</p>
+
+        <h1>
+            Estimate the right<br>
+            <em>school fee range.</em>
+        </h1>
+
+        <p class="lead">
+            Enter a few details about the school and get an
+            estimated annual fee. This tool is designed to make
+            fee planning simple for parents.
+        </p>
+
+        <!-- Small inline school illustration -->
+        <svg class="school-art"
+             viewBox="0 0 150 120"
+             xmlns="http://www.w3.org/2000/svg"
+             aria-label="School illustration">
+
+            <rect x="20" y="48" width="105" height="58"
+                  rx="5" fill="#ffffff" stroke="#74afd4" stroke-width="3"/>
+
+            <path d="M12 48 L72 15 L133 48 Z"
+                  fill="#5ba0cf"/>
+
+            <rect x="62" y="73" width="22" height="33"
+                  rx="3" fill="#d9eefb"/>
+
+            <rect x="31" y="62" width="16" height="13"
+                  rx="2" fill="#bde0f5"/>
+
+            <rect x="98" y="62" width="16" height="13"
+                  rx="2" fill="#bde0f5"/>
+
+            <circle cx="73" cy="30" r="7"
+                    fill="#f4c95d"/>
+
+            <path d="M68 30h10M73 25v10"
+                  stroke="#ffffff"
+                  stroke-width="2"/>
+        </svg>
+
+    </section>
+
+
+    <!-- =====================================================
+         WORKSPACE
+         ===================================================== -->
+
+    <section class="workspace">
+
+
+        <!-- =================================================
+             FORM
+             ================================================= -->
+
+        <div class="form-panel">
+
+            <div class="heading">
+
+                <div>
+                    <p class="eyebrow">School profile</p>
+                    <h2>Tell us about the school</h2>
+                </div>
+
+                <small>01 / 01</small>
+
             </div>
-        </div>
-    </header>
 
-    <main class="page">
 
-        <!-- Important Notice -->
-        <div class="notice">
-            <div class="notice-icon">ℹ️</div>
+            <form method="post" id="feeForm">
 
-            <div>
-                <strong>Initial Clinical Screening</strong>
-                <p>
-                    Please enter the patient's available clinical and laboratory
-                    information accurately. This assessment is intended as an
-                    initial screening aid and should be interpreted by a qualified
-                    healthcare professional.
-                </p>
-            </div>
-        </div>
 
-        <div class="assessment-card">
+                <!-- GRADE + BOARD -->
 
-            <!-- Card Header -->
-            <div class="card-header">
-                <h2>Patient Assessment Form</h2>
-                <p>
-                    Enter the patient's demographic information and laboratory
-                    results below.
-                </p>
-            </div>
+                <div class="two-col">
 
-            <form action="/predict" method="POST" novalidate>
+                    <label>
+                        Grade
 
-                <!-- Patient Information -->
-                <section class="section">
+                        <select name="grade" id="grade" required>
 
-                    <div class="section-title">
-                        <div class="section-number">1</div>
+                            <option value="">
+                                Select grade
+                            </option>
 
-                        <div>
-                            <h3>Patient Information</h3>
-                            <span>Basic demographic details</span>
-                        </div>
-                    </div>
+                            {% for grade in range(1, 13) %}
 
-                    <div class="form-grid">
+                            <option value="{{ grade }}"
+                                {% if form.get('grade') == grade|string %}
+                                    selected
+                                {% endif %}>
+                                Grade {{ grade }}
+                            </option>
 
-                        <!-- Age -->
-                        <div class="field-group">
+                            {% endfor %}
 
-                            <label for="personAge">
-                                Age <span class="required">*</span>
-                            </label>
+                        </select>
 
-                            <div class="input-wrapper">
-                                <span class="input-icon">👤</span>
-
-                                <input
-                                    type="number"
-                                    id="personAge"
-                                    name="personAge"
-                                    min="1"
-                                    max="120"
-                                    step="1"
-                                    value="{{ form.get('personAge', '') }}"
-                                    placeholder="Enter age"
-                                    required
-                                >
-                            </div>
-
-                            <span class="reference">
-                                Patient age in years
+                        {% if errors.grade %}
+                            <span class="error">
+                                {{ errors.grade }}
                             </span>
+                        {% endif %}
 
-                            {% if errors.get('personAge') %}
-                                <span class="error">
-                                    {{ errors['personAge'] }}
-                                </span>
-                            {% endif %}
+                    </label>
 
-                        </div>
 
-                        <!-- Gender -->
-                        <div class="field-group">
+                    <label>
+                        Board affiliation
 
-                            <label for="personGender">
-                                Gender <span class="required">*</span>
-                            </label>
+                        <select name="board_affiliation"
+                                id="board_affiliation"
+                                required>
 
-                            <div class="input-wrapper">
-                                <span class="input-icon">⚧</span>
+                            <option value="">
+                                Select board
+                            </option>
 
-                                <select
-                                    id="personGender"
-                                    name="personGender"
-                                    required
-                                >
-                                    <option value="">Select gender</option>
+                            {% for board in ['CBSE', 'IB', 'ICSE', 'IGCSE', 'State Board'] %}
 
-                                    <option
-                                        value="Male"
-                                        {% if form.get('personGender') == 'Male' %}
-                                            selected
-                                        {% endif %}
-                                    >
-                                        Male
-                                    </option>
+                            <option value="{{ board }}"
+                                {% if form.get('board_affiliation') == board %}
+                                    selected
+                                {% endif %}>
+                                {{ board }}
+                            </option>
 
-                                    <option
-                                        value="Female"
-                                        {% if form.get('personGender') == 'Female' %}
-                                            selected
-                                        {% endif %}
-                                    >
-                                        Female
-                                    </option>
-                                </select>
-                            </div>
+                            {% endfor %}
 
-                            <span class="reference">
-                                Select the patient's recorded sex
+                        </select>
+
+                        {% if errors.board_affiliation %}
+                            <span class="error">
+                                {{ errors.board_affiliation }}
                             </span>
+                        {% endif %}
 
-                            {% if errors.get('personGender') %}
-                                <span class="error">
-                                    {{ errors['personGender'] }}
-                                </span>
-                            {% endif %}
-
-                        </div>
-
-                    </div>
-                </section>
-
-
-                <!-- Blood Chemistry -->
-                <section class="section">
-
-                    <div class="section-title">
-                        <div class="section-number">2</div>
-
-                        <div>
-                            <h3>Blood Chemistry</h3>
-                            <span>Biochemical laboratory measurements</span>
-                        </div>
-                    </div>
-
-                    <div class="form-grid">
-
-                        <!-- Glucose -->
-                        <div class="field-group">
-
-                            <label for="blood_glucose_random">
-                                Random Blood Glucose
-                                <span class="required">*</span>
-                            </label>
-
-                            <div class="input-wrapper">
-                                <span class="input-icon">🩸</span>
-
-                                <input
-                                    type="number"
-                                    id="blood_glucose_random"
-                                    name="blood_glucose_random"
-                                    min="22"
-                                    max="800"
-                                    step="0.1"
-                                    value="{{ form.get('blood_glucose_random', '') }}"
-                                    placeholder="e.g. 110"
-                                    required
-                                >
-                            </div>
-
-                            <span class="reference">
-                                Reference range: 22–490 mg/dL
-                            </span>
-
-                            {% if errors.get('blood_glucose_random') %}
-                                <span class="error">
-                                    {{ errors['blood_glucose_random'] }}
-                                </span>
-                            {% endif %}
-
-                        </div>
-
-                        <!-- Blood Urea -->
-                        <div class="field-group">
-
-                            <label for="blood_urea">
-                                Blood Urea
-                                <span class="required">*</span>
-                            </label>
-
-                            <div class="input-wrapper">
-                                <span class="input-icon">🧪</span>
-
-                                <input
-                                    type="number"
-                                    id="blood_urea"
-                                    name="blood_urea"
-                                    min="7"
-                                    max="200"
-                                    step="0.1"
-                                    value="{{ form.get('blood_urea', '') }}"
-                                    placeholder="e.g. 15"
-                                    required
-                                >
-                            </div>
-
-                            <span class="reference">
-                                Reference range: 7–20 mg/dL
-                            </span>
-
-                            {% if errors.get('blood_urea') %}
-                                <span class="error">
-                                    {{ errors['blood_urea'] }}
-                                </span>
-                            {% endif %}
-
-                        </div>
-
-                        <!-- Creatinine -->
-                        <div class="field-group">
-
-                            <label for="serum_creatinine">
-                                Serum Creatinine
-                                <span class="required">*</span>
-                            </label>
-
-                            <div class="input-wrapper">
-                                <span class="input-icon">🧬</span>
-
-                                <input
-                                    type="number"
-                                    id="serum_creatinine"
-                                    name="serum_creatinine"
-                                    min="0.1"
-                                    max="12.0"
-                                    step="0.1"
-                                    value="{{ form.get('serum_creatinine', '') }}"
-                                    placeholder="e.g. 1.0"
-                                    required
-                                >
-                            </div>
-
-                            <span class="reference">
-                                Reference range: 0.6–1.3 mg/dL
-                            </span>
-
-                            {% if errors.get('serum_creatinine') %}
-                                <span class="error">
-                                    {{ errors['serum_creatinine'] }}
-                                </span>
-                            {% endif %}
-
-                        </div>
-
-                        <!-- Sodium -->
-                        <div class="field-group">
-
-                            <label for="sodium">
-                                Sodium
-                                <span class="required">*</span>
-                            </label>
-
-                            <div class="input-wrapper">
-                                <span class="input-icon">💧</span>
-
-                                <input
-                                    type="number"
-                                    id="sodium"
-                                    name="sodium"
-                                    min="100"
-                                    max="145"
-                                    step="0.1"
-                                    value="{{ form.get('sodium', '') }}"
-                                    placeholder="e.g. 140"
-                                    required
-                                >
-                            </div>
-
-                            <span class="reference">
-                                Reference range: 135–145 mEq/L
-                            </span>
-
-                            {% if errors.get('sodium') %}
-                                <span class="error">
-                                    {{ errors['sodium'] }}
-                                </span>
-                            {% endif %}
-
-                        </div>
-
-                        <!-- Potassium -->
-                        <div class="field-group">
-
-                            <label for="potassium">
-                                Potassium
-                                <span class="required">*</span>
-                            </label>
-
-                            <div class="input-wrapper">
-                                <span class="input-icon">⚡</span>
-
-                                <input
-                                    type="number"
-                                    id="potassium"
-                                    name="potassium"
-                                    min="2.5"
-                                    max="7.5"
-                                    step="0.1"
-                                    value="{{ form.get('potassium', '') }}"
-                                    placeholder="e.g. 4.2"
-                                    required
-                                >
-                            </div>
-
-                            <span class="reference">
-                                Reference range: 3.5–5.0 mEq/L
-                            </span>
-
-                            {% if errors.get('potassium') %}
-                                <span class="error">
-                                    {{ errors['potassium'] }}
-                                </span>
-                            {% endif %}
-
-                        </div>
-
-                    </div>
-                </section>
-
-
-                <!-- Hematology -->
-                <section class="section">
-
-                    <div class="section-title">
-                        <div class="section-number">3</div>
-
-                        <div>
-                            <h3>Hematology</h3>
-                            <span>Complete blood count parameters</span>
-                        </div>
-                    </div>
-
-                    <div class="form-grid">
-
-                        <!-- Hemoglobin -->
-                        <div class="field-group">
-
-                            <label for="hemoglobin">
-                                Hemoglobin
-                                <span class="required">*</span>
-                            </label>
-
-                            <div class="input-wrapper">
-                                <span class="input-icon">🩸</span>
-
-                                <input
-                                    type="number"
-                                    id="hemoglobin"
-                                    name="hemoglobin"
-                                    min="7.0"
-                                    max="17.5"
-                                    step="0.1"
-                                    value="{{ form.get('hemoglobin', '') }}"
-                                    placeholder="Enter value"
-                                    required
-                                >
-                            </div>
-
-                            <span id="hemoglobinReference" class="reference">
-                                Reference: Women 12.0–15.5 g/dL;
-                                Men 13.5–17.5 g/dL
-                            </span>
-
-                            {% if errors.get('hemoglobin') %}
-                                <span class="error">
-                                    {{ errors['hemoglobin'] }}
-                                </span>
-                            {% endif %}
-
-                        </div>
-
-
-                        <!-- PCV -->
-                        <div class="field-group">
-
-                            <label for="packed_cell_volume">
-                                Packed Cell Volume
-                                <span class="required">*</span>
-                            </label>
-
-                            <div class="input-wrapper">
-                                <span class="input-icon">🧫</span>
-
-                                <input
-                                    type="number"
-                                    id="packed_cell_volume"
-                                    name="packed_cell_volume"
-                                    min="19"
-                                    max="55"
-                                    step="0.1"
-                                    value="{{ form.get('packed_cell_volume', '') }}"
-                                    placeholder="Enter value"
-                                    required
-                                >
-                            </div>
-
-                            <span id="packedCellVolumeReference" class="reference">
-                                Reference: Women 36–44%;
-                                Men 41–50%
-                            </span>
-
-                            {% if errors.get('packed_cell_volume') %}
-                                <span class="error">
-                                    {{ errors['packed_cell_volume'] }}
-                                </span>
-                            {% endif %}
-
-                        </div>
-
-
-                        <!-- WBC -->
-                        <div class="field-group">
-
-                            <label for="white_blood_cell">
-                                White Blood Cell Count
-                                <span class="required">*</span>
-                            </label>
-
-                            <div class="input-wrapper">
-                                <span class="input-icon">🔬</span>
-
-                                <input
-                                    type="number"
-                                    id="white_blood_cell"
-                                    name="white_blood_cell"
-                                    min="4500"
-                                    max="15000"
-                                    step="1"
-                                    value="{{ form.get('white_blood_cell', '') }}"
-                                    placeholder="e.g. 7500"
-                                    required
-                                >
-                            </div>
-
-                            <span class="reference">
-                                Reference range: 4,500–11,000 /µL
-                            </span>
-
-                            {% if errors.get('white_blood_cell') %}
-                                <span class="error">
-                                    {{ errors['white_blood_cell'] }}
-                                </span>
-                            {% endif %}
-
-                        </div>
-
-
-                        <!-- RBC -->
-                        <div class="field-group">
-
-                            <label for="red_blood_cell">
-                                Red Blood Cell Count
-                                <span class="required">*</span>
-                            </label>
-
-                            <div class="input-wrapper">
-                                <span class="input-icon">🔴</span>
-
-                                <input
-                                    type="number"
-                                    id="red_blood_cell"
-                                    name="red_blood_cell"
-                                    min="2.35"
-                                    max="5.65"
-                                    step="0.01"
-                                    value="{{ form.get('red_blood_cell', '') }}"
-                                    placeholder="Enter value"
-                                    required
-                                >
-                            </div>
-
-                            <span id="redBloodCellReference" class="reference">
-                                Reference: Women 3.92–5.13 million/µL;
-                                Men 4.35–5.65 million/µL
-                            </span>
-
-                            {% if errors.get('red_blood_cell') %}
-                                <span class="error">
-                                    {{ errors['red_blood_cell'] }}
-                                </span>
-                            {% endif %}
-
-                        </div>
-
-                    </div>
-                </section>
-
-
-                <!-- Submit -->
-                <div class="form-footer">
-
-                    <div class="footer-note">
-                        <strong>* Required fields</strong><br>
-                        Verify laboratory values before submitting the assessment.
-                    </div>
-
-                    <button type="submit" class="submit-button">
-                        Run Initial Assessment →
-                    </button>
+                    </label>
 
                 </div>
 
+
+                <!-- CITY TIER -->
+
+                <label>
+                    City tier
+
+                    <select name="city_tier"
+                            id="city_tier"
+                            required>
+
+                        <option value="">
+                            Select city tier
+                        </option>
+
+                        {% for tier in ['Tier 1', 'Tier 2', 'Tier 3'] %}
+
+                        <option value="{{ tier }}"
+                            {% if form.get('city_tier') == tier %}
+                                selected
+                            {% endif %}>
+                            {{ tier }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                    {% if errors.city_tier %}
+                        <span class="error">
+                            {{ errors.city_tier }}
+                        </span>
+                    {% endif %}
+
+                </label>
+
+
+                <!-- FACILITIES -->
+
+                <div class="rule">
+                    <span>🏫 Available facilities</span>
+                </div>
+
+
+                <div class="facilities">
+
+                    {% for field, label in [
+                        ('smart_classrooms', '💻 Smart classrooms'),
+                        ('sports_facilities', '⚽ Sports facilities'),
+                        ('lab_facilities', '🔬 Lab facilities')
+                    ] %}
+
+                    <fieldset>
+
+                        <legend>
+                            {{ label }}
+                        </legend>
+
+                        <div class="choices">
+
+                            <label>
+                                <input type="radio"
+                                       name="{{ field }}"
+                                       value="Yes"
+                                       {% if form.get(field) == 'Yes' %}
+                                           checked
+                                       {% endif %}>
+                                <span>Yes</span>
+                            </label>
+
+                            <label>
+                                <input type="radio"
+                                       name="{{ field }}"
+                                       value="No"
+                                       {% if form.get(field) == 'No' %}
+                                           checked
+                                       {% endif %}>
+                                <span>No</span>
+                            </label>
+
+                        </div>
+
+                        {% if errors[field] %}
+                            <small class="error">
+                                {{ errors[field] }}
+                            </small>
+                        {% endif %}
+
+                    </fieldset>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- PREDICT BUTTON -->
+
+                <button type="submit"
+                        id="predictButton"
+                        disabled>
+
+                    Complete all fields to predict
+
+                    <span>↗</span>
+
+                </button>
+
             </form>
+
         </div>
 
-        <div class="page-footer">
-            Clinical decision-support tool • For professional healthcare use
-        </div>
 
-    </main>
+        <!-- =================================================
+             RESULT
+             ================================================= -->
 
+        <aside class="result">
 
-    <script>
+            <div class="result-head">
 
-        const genderField =
-            document.getElementById("personGender");
+                <p class="eyebrow">
+                    Estimated annual fee
+                </p>
 
-        function updateGenderSpecificRanges() {
+                <strong>₹</strong>
 
-            const gender =
-                (genderField.value || "").toLowerCase();
-
-            const hemoglobin =
-                document.getElementById("hemoglobin");
-
-            const hemoglobinReference =
-                document.getElementById("hemoglobinReference");
-
-            const pcv =
-                document.getElementById("packed_cell_volume");
-
-            const pcvReference =
-                document.getElementById("packedCellVolumeReference");
-
-            const rbc =
-                document.getElementById("red_blood_cell");
-
-            const rbcReference =
-                document.getElementById("redBloodCellReference");
+            </div>
 
 
-            if (gender === "male") {
+            {% if prediction is not none %}
 
-                hemoglobin.min = 13.5;
-                hemoglobin.max = 17.5;
+                <div class="amount">
+                    ₹{{ '{:,.0f}'.format(prediction) }}
+                </div>
 
-                hemoglobinReference.textContent =
-                    "Reference: Men: 13.5–17.5 g/dL";
+                <p class="note">
+                    Projected fee based on the school profile
+                    you provided.
+                </p>
 
-                pcv.min = 41;
-                pcv.max = 50;
+            {% else %}
 
-                pcvReference.textContent =
-                    "Reference: Men: 41–50%";
+                <div class="empty">
 
-                rbc.min = 4.35;
-                rbc.max = 5.65;
+                    <b>₹</b>
 
-                rbcReference.textContent =
-                    "Reference: Men: 4.35–5.65 million/µL";
+                    <p>
+                        Complete the school profile and your
+                        estimated annual fee will appear here.
+                    </p>
 
-            }
+                </div>
 
-            else if (gender === "female") {
+            {% endif %}
 
-                hemoglobin.min = 12.0;
-                hemoglobin.max = 15.5;
 
-                hemoglobinReference.textContent =
-                    "Reference: Women: 12.0–15.5 g/dL";
+            <footer>
+                <span>Tuition fee per Term</span>
+                <span>INR</span>
+            </footer>
 
-                pcv.min = 36;
-                pcv.max = 44;
+        </aside>
 
-                pcvReference.textContent =
-                    "Reference: Women: 36–44%";
+    </section>
 
-                rbc.min = 3.92;
-                rbc.max = 5.13;
 
-                rbcReference.textContent =
-                    "Reference: Women: 3.92–5.13 million/µL";
+    <p class="disclaimer">
+        Estimates are indicative and intended for planning purposes.
+        Actual fees may vary by school and academic year.
+    </p>
 
-            }
+</main>
 
-            else {
 
-                hemoglobin.min = 12.0;
-                hemoglobin.max = 17.5;
+<!-- =========================================================
+     BUTTON VALIDATION
+     ========================================================= -->
 
-                hemoglobinReference.textContent =
-                    "Reference: Women: 12.0–15.5 g/dL; Men: 13.5–17.5 g/dL";
+<script>
 
-                pcv.min = 36;
-                pcv.max = 50;
+    const form = document.getElementById("feeForm");
+    const predictButton = document.getElementById("predictButton");
 
-                pcvReference.textContent =
-                    "Reference: Women: 36–44%; Men: 41–50%";
+    const grade = document.getElementById("grade");
+    const board = document.getElementById("board_affiliation");
+    const cityTier = document.getElementById("city_tier");
 
-                rbc.min = 3.92;
-                rbc.max = 5.65;
 
-                rbcReference.textContent =
-                    "Reference: Women: 3.92–5.13 million/µL; Men: 4.35–5.65 million/µL";
-            }
+    /*
+     * Checks whether a radio-button group
+     * has either Yes or No selected.
+     */
+    function radioGroupCompleted(name) {
+
+        return document.querySelector(
+            `input[name="${name}"]:checked`
+        ) !== null;
+
+    }
+
+
+    /*
+     * Check every required field.
+     */
+    function checkFormCompletion() {
+
+        const gradeSelected =
+            grade.value.trim() !== "";
+
+        const boardSelected =
+            board.value.trim() !== "";
+
+        const cityTierSelected =
+            cityTier.value.trim() !== "";
+
+        const smartClassroomsSelected =
+            radioGroupCompleted("smart_classrooms");
+
+        const sportsSelected =
+            radioGroupCompleted("sports_facilities");
+
+        const labSelected =
+            radioGroupCompleted("lab_facilities");
+
+
+        const allCompleted =
+            gradeSelected &&
+            boardSelected &&
+            cityTierSelected &&
+            smartClassroomsSelected &&
+            sportsSelected &&
+            labSelected;
+
+
+        /*
+         * Enable the button only when
+         * EVERY required field is completed.
+         */
+
+        predictButton.disabled = !allCompleted;
+
+
+        if (allCompleted) {
+
+            predictButton.textContent =
+                "Predict school fee ";
+
+            const arrow = document.createElement("span");
+            arrow.textContent = "↗";
+
+            predictButton.appendChild(arrow);
+
+        } else {
+
+            predictButton.textContent =
+                "Complete all fields to predict ";
+
+            const arrow = document.createElement("span");
+            arrow.textContent = "↗";
+
+            predictButton.appendChild(arrow);
+
         }
 
+    }
 
-        genderField.addEventListener(
+
+    /*
+     * Watch dropdowns.
+     */
+    grade.addEventListener("change", checkFormCompletion);
+    board.addEventListener("change", checkFormCompletion);
+    cityTier.addEventListener("change", checkFormCompletion);
+
+
+    /*
+     * Watch Yes / No selections.
+     */
+    document.querySelectorAll(
+        'input[type="radio"]'
+    ).forEach(function(radio) {
+
+        radio.addEventListener(
             "change",
-            updateGenderSpecificRanges
+            checkFormCompletion
         );
 
-        updateGenderSpecificRanges();
+    });
 
-    </script>
+
+    /*
+     * Run once when the page loads.
+     *
+     * This is useful when Flask sends back
+     * previously entered values after validation.
+     */
+    checkFormCompletion();
+
+</script>
 
 </body>
 </html>
-
